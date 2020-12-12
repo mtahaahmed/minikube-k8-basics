@@ -1,0 +1,51 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-app
+  labels:
+    app: python-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: python-app
+  template:
+    metadata:
+      labels:
+        app: python-app
+    spec:
+      containers:
+      - name: python-app
+        image: {{ .Values.appimage }}
+        env:
+        - name: MYSQL_DB_HOST
+          value: mysql
+        - name: MYSQL_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-password
+              key: mysql_password
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: shared-storage
+          mountPath: /storage-demo
+      volumes:
+      - name: shared-storage
+        persistentVolumeClaim:
+          claimName: app-pvclaim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: python-service
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+  - protocol: TCP
+    port: {{ .Values.service.port }}
+    targetPort: 8000
+    nodePort: 30001
+  selector:
+    app: python-app
