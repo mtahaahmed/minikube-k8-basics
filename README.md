@@ -38,3 +38,9 @@ $ kubectl get ingress
 ```
 
 Enter mentioned IP address in your browser and you will see `Hello World`
+
+or do this inside `minikube ssh`
+
+```
+$ curl http://localhost
+```
